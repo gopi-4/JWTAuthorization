@@ -16,9 +16,11 @@ public class UserService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    public static User userLogIn(UserDTO userDTO) {
+    public User userLogIn(UserDTO userDTO) {
+//        System.out.println(userDTO);
         User user = UserMapper.mapDtoToEntity(userDTO);
-        System.out.println(user);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+//        System.out.println(user);
         return user;
     }
 }

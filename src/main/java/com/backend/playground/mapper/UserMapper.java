@@ -15,7 +15,9 @@ public class UserMapper {
         user.setAbout(userDTO.getAbout());
         user.setPassword(userDTO.getPassword());
         user.setActive(userDTO.isActive());
+        user.setImage(userDTO.getImage());
         return user;
+
     }
 
     public static UserDTO mapEntityToDto(User user) {
@@ -28,6 +30,8 @@ public class UserMapper {
         userDTO.setAbout(user.getAbout());
         userDTO.setPassword(user.getPassword());
         userDTO.setActive(user.isActive());
+        userDTO.setImage(user.getImage());
         return userDTO;
+
     }
 }

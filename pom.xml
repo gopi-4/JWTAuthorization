@@ -45,10 +45,16 @@
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 <!--			<version>3.1.5</version>-->
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.mysql</groupId>-->
+<!--			<artifactId>mysql-connector-j</artifactId>-->
+<!--&lt;!&ndash;			<version>8.2.0</version>&ndash;&gt;-->
+<!--		</dependency>-->
+<!--		PostgreSQL-->
 		<dependency>
-			<groupId>com.mysql</groupId>
-			<artifactId>mysql-connector-j</artifactId>
-<!--			<version>8.2.0</version>-->
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<!--		WebFlux-->
 		<dependency>
