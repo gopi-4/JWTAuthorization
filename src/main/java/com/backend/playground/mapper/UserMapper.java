@@ -5,6 +5,7 @@ import com.backend.playground.entity.User;
 
 public class UserMapper {
 
+
     public static User mapDtoToEntity(UserDTO userDTO) {
         User user = new User();
         user.setFirstName(userDTO.getFirstName());
@@ -15,7 +16,7 @@ public class UserMapper {
         user.setAbout(userDTO.getAbout());
         user.setPassword(userDTO.getPassword());
         user.setActive(userDTO.isActive());
-        user.setImage(userDTO.getImage());
+        user.setImage(ImageMapper.mapDtoToEntity(userDTO.getImage()));
         return user;
 
     }
@@ -30,7 +31,7 @@ public class UserMapper {
         userDTO.setAbout(user.getAbout());
         userDTO.setPassword(user.getPassword());
         userDTO.setActive(user.isActive());
-        userDTO.setImage(user.getImage());
+        userDTO.setImage(ImageMapper.mapEntityToDto(user.getImage()));
         return userDTO;
 
     }

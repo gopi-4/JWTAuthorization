@@ -1,5 +1,6 @@
 package com.backend.playground.entity;
 
+import com.backend.playground.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,7 +34,7 @@ public class User implements UserDetails {
     private String about;
     private String password;
     private boolean isActive;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "image_id")
     private Image image;
 

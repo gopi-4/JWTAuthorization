@@ -5,6 +5,9 @@ import com.backend.playground.entity.User;
 import com.backend.playground.mapper.UserMapper;
 import com.backend.playground.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +20,11 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     public User userLogIn(UserDTO userDTO) {
-//        System.out.println(userDTO);
+        System.out.println(userDTO);
         User user = UserMapper.mapDtoToEntity(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-//        System.out.println(user);
-        return user;
+        System.out.println(user);
+        return userRepository.saveAndFlush(user);
+//        return user;
     }
 }

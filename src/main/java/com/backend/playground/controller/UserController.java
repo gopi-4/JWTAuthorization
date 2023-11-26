@@ -13,9 +13,13 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    @PostMapping("/login")
+    @PostMapping("/signup")
     private Mono<User> userLogIn(@RequestBody UserDTO userDTO) {
-
         return Mono.just(userService.userLogIn(userDTO));
+    }
+
+    @GetMapping("/test")
+    private void test(){
+        System.out.println("It is an testing!!");
     }
 }
