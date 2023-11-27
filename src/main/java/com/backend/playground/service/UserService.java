@@ -4,27 +4,22 @@ import com.backend.playground.dto.UserDTO;
 import com.backend.playground.entity.User;
 import com.backend.playground.mapper.UserMapper;
 import com.backend.playground.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public User userLogIn(UserDTO userDTO) {
+    public UserDTO userLogIn(UserDTO userDTO) {
         System.out.println(userDTO);
         User user = UserMapper.mapDtoToEntity(userDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         System.out.println(user);
-        return userRepository.saveAndFlush(user);
-//        return user;
+        return UserMapper.mapEntityToDto(userRepository.saveAndFlush(user));
     }
 }

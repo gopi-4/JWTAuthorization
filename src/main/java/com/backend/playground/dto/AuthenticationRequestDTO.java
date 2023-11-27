@@ -7,11 +7,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class ImageDTO {
+@NoArgsConstructor
+public class AuthenticationRequestDTO {
 
-    private int Id;
-    private String URL;
-    private String Description;
+    private String email;
+    String password;
 }

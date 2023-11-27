@@ -21,24 +21,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
-<!--		GSON -->
-<!--		<dependency>-->
-<!--			<groupId>com.google.code.gson</groupId>-->
-<!--			<artifactId>gson</artifactId>-->
-<!--			<version>2.10.1</version>-->
-<!--		</dependency>-->
-<!--		Jackson-->
-<!--		<dependency>-->
-<!--			<groupId>com.fasterxml.jackson.dataformat</groupId>-->
-<!--			<artifactId>jackson-dataformat-xml</artifactId>-->
-<!--			<version>2.15.2</version>-->
-<!--		</dependency>-->
 		<!--JPA-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -56,12 +43,19 @@
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		<!--		WebFlux-->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId>
-<!--			<version>3.1.5</version>-->
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+
+		<!--		WebFlux-->
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-webflux</artifactId>-->
+<!--&lt;!&ndash;			<version>3.1.5</version>&ndash;&gt;-->
+<!--		</dependency>-->
+
 <!--		Security-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

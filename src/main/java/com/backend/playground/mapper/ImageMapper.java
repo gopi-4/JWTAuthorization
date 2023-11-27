@@ -6,18 +6,16 @@ import com.backend.playground.entity.Image;
 public class ImageMapper {
 
     public static Image mapDtoToEntity(ImageDTO imageDTO) {
-        Image image = new Image();
-        image.setId(imageDTO.getId());
-        image.setURL(imageDTO.getURL());
-        image.setDescription(imageDTO.getDescription());
-        return image;
+        return Image.builder()
+                .URL(imageDTO.getURL())
+                .Description(imageDTO.getDescription())
+                .build();
     }
 
     public static ImageDTO mapEntityToDto(Image image) {
-        ImageDTO imageDTO = new ImageDTO();
-        imageDTO.setId(image.getId());
-        imageDTO.setURL(image.getURL());
-        imageDTO.setDescription(image.getDescription());
-        return imageDTO;
+        return ImageDTO.builder()
+                .URL(image.getURL())
+                .Description(image.getDescription())
+                .build();
     }
 }

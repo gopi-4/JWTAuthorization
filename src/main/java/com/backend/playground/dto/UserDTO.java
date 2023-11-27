@@ -23,15 +23,4 @@ public class UserDTO {
     private String password;
     private boolean isActive;
     private ImageDTO image;
-
-    public UserDTO(String lastName, String email, Date DOB, Role role, String about, String password, boolean isActive, ImageDTO image) {
-        this.lastName = lastName;
-        this.email = email;
-        this.DOB = DOB;
-        this.role = role;
-        this.about = about;
-        this.password = password;
-        this.isActive = isActive;
-        this.image = image;
-    }
 }

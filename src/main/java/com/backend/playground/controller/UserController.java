@@ -1,25 +1,20 @@
 package com.backend.playground.controller;
 
-import com.backend.playground.dto.UserDTO;
-import com.backend.playground.entity.User;
+
 import com.backend.playground.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
 @RestController()
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
-
-    @Autowired
-    private UserService userService;
-    @PostMapping("/signup")
-    private Mono<User> userLogIn(@RequestBody UserDTO userDTO) {
-        return Mono.just(userService.userLogIn(userDTO));
-    }
+    private final UserService userService;
 
     @GetMapping("/test")
-    private void test(){
-        System.out.println("It is an testing!!");
+    private ResponseEntity<String> test(){
+        System.out.println("Hii");
+        return ResponseEntity.ok("Success 😎");
     }
 }
