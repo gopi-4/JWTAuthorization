@@ -1,7 +1,7 @@
 package com.backend.playground.configuration;
 
 import com.backend.playground.jwt.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -15,7 +15,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
-@RequiredArgsConstructor
 @EnableMethodSecurity
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -23,8 +22,10 @@ public class SecurityConfiguration {
     private static final String[] WHITE_LIST_URL = {
             "/api/v1/auth/**",
     };
-    private final JwtAuthenticationFilter jwtAuthFilter;
-    private final AuthenticationProvider authenticationProvider;
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthFilter;
+    @Autowired
+    private AuthenticationProvider authenticationProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
