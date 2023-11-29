@@ -26,11 +26,21 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponseDTO> register(@RequestBody UserDTO userDTO) {
-        return ResponseEntity.ok(authenticationService.register(userDTO));
+        try {
+            return ResponseEntity.ok(authenticationService.register(userDTO));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body((new AuthenticationResponseDTO()));
+        }
     }
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponseDTO> authenticate(@RequestBody AuthenticationRequestDTO request) {
-        return ResponseEntity.ok(authenticationService.authenticate(request));
+        try {
+            return ResponseEntity.ok(authenticationService.authenticate(request));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body((new AuthenticationResponseDTO()));
+        }
     }
 
     @PostMapping("/refresh-token")

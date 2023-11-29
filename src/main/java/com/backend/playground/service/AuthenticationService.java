@@ -6,6 +6,7 @@ import com.backend.playground.dto.UserDTO;
 import com.backend.playground.entity.Token;
 import com.backend.playground.entity.User;
 import com.backend.playground.enums.TokenType;
+import com.backend.playground.userdetails.CustomUserDetails;
 import com.backend.playground.jwt.JwtService;
 import com.backend.playground.mapper.UserMapper;
 import com.backend.playground.repository.TokenRepository;
@@ -36,29 +37,32 @@ public class AuthenticationService {
     @Autowired
     private  AuthenticationManager authenticationManager;
 
-    public AuthenticationResponseDTO register(UserDTO userDTO) {
+    public AuthenticationResponseDTO register(UserDTO userDTO) throws Exception {
 
         logger.info("Registering User");
         try {
             User user = UserMapper.mapDtoToEntity(userDTO);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
+            CustomUserDetails customUserDetails = new CustomUserDetails(user);
             var savedUser = userRepository.save(user);
-            var jwtToken = jwtService.generateToken(user);
-            var refreshToken = jwtService.generateRefreshToken(user);
+            var jwtToken = jwtService.generateToken(customUserDetails);
+            var refreshToken = jwtService.generateRefreshToken(customUserDetails);
             saveUserToken(savedUser, jwtToken);
 
             logger.info("User Registered Successfully");
+            logger.info("###########################################");
             return AuthenticationResponseDTO.builder()
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)
                     .build();
         }catch (Exception e) {
-            logger.error(e.getMessage());
-            return AuthenticationResponseDTO.builder().build();
+//            logger.error(e.getMessage());
+//            return AuthenticationResponseDTO.builder().build();
+            throw new Exception(e.getMessage());
         }
     }
 
-    public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
+    public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) throws Exception {
 
         logger.info("Authenticating User Request");
         try {
@@ -69,24 +73,27 @@ public class AuthenticationService {
                     )
             );
             var user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-            var jwtToken = jwtService.generateToken(user);
-            var refreshToken = jwtService.generateRefreshToken(user);
+            CustomUserDetails customUserDetails = new CustomUserDetails(user);
+            var jwtToken = jwtService.generateToken(customUserDetails);
+            var refreshToken = jwtService.generateRefreshToken(customUserDetails);
             revokeAllUserTokens(user);
             saveUserToken(user, jwtToken);
 
             logger.info("User Authenticated Successfully");
+            logger.info("###########################################");
             return AuthenticationResponseDTO.builder()
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)
                     .build();
 
         }catch (Exception e) {
-            logger.error(e.getMessage());
-            return AuthenticationResponseDTO.builder().build();
+//            logger.error(e.getMessage());
+//            return AuthenticationResponseDTO.builder().build();
+            throw new Exception(e.getMessage());
         }
     }
 
-    private void saveUserToken(User user, String jwtToken) {
+    private void saveUserToken(User user, String jwtToken) throws Exception {
         logger.info("Saving User Token");
         try {
             var token = Token.builder()
@@ -99,11 +106,12 @@ public class AuthenticationService {
             tokenRepository.save(token);
             logger.info("Token Saved to Respective User");
         }catch (Exception e) {
-            logger.error(e.getMessage());
+//            logger.error(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
-    private void revokeAllUserTokens(User user) {
+    private void revokeAllUserTokens(User user) throws Exception {
 
         logger.info("Revoking All User's Token");
         try {
@@ -117,7 +125,8 @@ public class AuthenticationService {
             tokenRepository.saveAll(validUserTokens);
             logger.info("Revoke Successful");
         }catch (Exception e) {
-            logger.error(e.getMessage());
+//            logger.error(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -136,11 +145,13 @@ public class AuthenticationService {
             userEmail = jwtService.extractUsername(refreshToken);
             if (userEmail != null) {
                 var user = this.userRepository.findByEmail(userEmail).orElseThrow();
-                if (jwtService.isTokenValid(refreshToken, user)) {
-                    var accessToken = jwtService.generateToken(user);
+                CustomUserDetails customUserDetails = new CustomUserDetails(user);
+                if (jwtService.isTokenValid(refreshToken, customUserDetails)) {
+                    var accessToken = jwtService.generateToken(customUserDetails);
                     revokeAllUserTokens(user);
                     saveUserToken(user, accessToken);
                     logger.info("Token Refreshed Successfully");
+                    logger.info("###########################################");
 //                    var authResponse = AuthenticationResponseDTO.builder()
 //                            .accessToken(accessToken)
 //                            .refreshToken(refreshToken)

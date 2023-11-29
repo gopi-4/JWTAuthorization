@@ -1,7 +1,7 @@
 package com.backend.playground.configuration;
 
 import com.backend.playground.auditing.ApplicationAuditAware;
-import com.backend.playground.service.UserService;
+import com.backend.playground.userdetails.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -23,7 +23,7 @@ public class ApplicationConfiguration {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new UserService();
+        return new CustomUserDetailsService();
     }
     @Bean
     public AuthenticationProvider authenticationProvider() {
