@@ -95,6 +95,9 @@ public class AuthenticationService {
 
     private void saveUserToken(User user, String jwtToken) throws Exception {
         logger.info("Saving User Token");
+        String[] token_arr = jwtToken.split("\\.");
+        System.out.println("length : "+token_arr[2].length());
+        System.out.println(jwtToken);
         try {
             var token = Token.builder()
                     .user(user)

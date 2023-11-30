@@ -19,13 +19,13 @@ public class UserController {
     }
 
     @GetMapping("/admin")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     private ResponseEntity<String> forAdminOnly() {
         return ResponseEntity.ok("I am the Admin.");
     }
 
     @GetMapping("/user")
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     private ResponseEntity<String> forUserOnly() {
         return ResponseEntity.ok("I am the User.");
     }

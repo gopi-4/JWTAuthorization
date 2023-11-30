@@ -1,6 +1,7 @@
 package com.backend.playground.configuration;
 
 import com.backend.playground.jwt.JwtAuthenticationFilter;
+import com.backend.playground.oAuth2.OAuth2LoginSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +20,13 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 public class SecurityConfiguration {
 
+    @Autowired
+    private static OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
     private static final String[] WHITE_LIST_URL = {
             "/api/v1/auth/**",
+            "/api/v1/oAuth2/**",
+            "/login"
     };
     @Autowired
     private JwtAuthenticationFilter jwtAuthFilter;
@@ -37,6 +43,9 @@ public class SecurityConfiguration {
                                 .anyRequest()
                                 .authenticated()
                 )
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .oauth2Login(auth -> auth.defaultSuccessUrl("/api/v1/oAuth2/user"))
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
