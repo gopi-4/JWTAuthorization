@@ -1,11 +1,9 @@
 package com.backend.playground.entity;
 
+import com.backend.playground.customs.CustomUserDetails;
 import com.backend.playground.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
@@ -32,4 +30,17 @@ public class User {
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "image_id")
     private Image image;
+
+    public User(@NonNull CustomUserDetails customUserDetails) {
+        this.Id=customUserDetails.getId();
+        this.firstName=customUserDetails.getFirstName();
+        this.lastName=customUserDetails.getLastName();
+        this.email=customUserDetails.getEmail();
+        this.DOB=customUserDetails.getDOB();
+        this.role=customUserDetails.getRole();
+        this.about=customUserDetails.getAbout();
+        this.password=customUserDetails.getPassword();
+        this.isActive= customUserDetails.isActive();
+        this.image=customUserDetails.getImage();
+    }
 }

@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -23,15 +24,15 @@ import java.util.function.Function;
 public class JwtService {
 
     private final Logger logger = LogManager.getLogger(JwtService.class);
-    @Value("${application.security.jwt.secret-key}")
-    private String secretKey;
+
+//    @Value("${application.security.jwt.secret-key}")
+//    private String secretKey;
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long refreshExpiration;
-
-    private final String publicKey;
-    private final String privateKey;
+    private String publicKey;
+    private String privateKey;
 
     {
         try {
@@ -45,7 +46,9 @@ public class JwtService {
         }
     }
 
-    public PublicKey generateJwtKeyDecryption(String jwtPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public PublicKey generateJwtKeyDecryption(String token, String jwtPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        String kid = getHeaderClaims(token, "kid");
+        if(kid!=null) return PublicKeys.getPublicKey(kid);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         byte[] keyBytes = Base64.decodeBase64(jwtPublicKey);
         X509EncodedKeySpec x509EncodedKeySpec=new X509EncodedKeySpec(keyBytes);
@@ -64,7 +67,7 @@ public class JwtService {
         logger.info("Extracting Username Claim.");
         try {
 //            logger.info("Username Claim Extracted Successfully.");
-            return extractClaim(token, Claims::getSubject);
+            return extractAllClaims(token).get("email", String.class);
         }catch (Exception e){
 //            logger.error(e.getMessage());
             throw new Exception(e.getMessage());
@@ -91,7 +94,7 @@ public class JwtService {
 //            logger.info("All Claims Extracted Successfully for Given Token.");
             return Jwts
                     .parserBuilder()
-                    .setSigningKey(generateJwtKeyDecryption(publicKey))
+                    .setSigningKey(generateJwtKeyDecryption(token, publicKey))
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -165,10 +168,11 @@ public class JwtService {
         logger.info("Building Token for Given userDetails, ExtraClaims and Expiration.");
         try {
 //            logger.info("Token Build for Given userDetails, ExtraClaims and Expiration.");
+            extraClaims.put("email", userDetails.getUsername());
+            extraClaims.put("iss", "Local");
             return Jwts
                     .builder()
                     .setClaims(extraClaims)
-                    .setSubject(userDetails.getUsername())
                     .setIssuedAt(new Date(System.currentTimeMillis()))
                     .setExpiration(new Date(System.currentTimeMillis() + expiration))
                     .signWith(SignatureAlgorithm.RS256, generateJwtKeyEncryption(privateKey))
@@ -238,4 +242,23 @@ public class JwtService {
 //            throw new Exception(e.getMessage());
 //        }
 //    }
+
+    public String getHeaderClaims(String token, String claim) {
+
+        String[] components = token.split("\\.");
+
+        JSONObject header = new JSONObject(new String(java.util.Base64.getDecoder().decode(components[0])));
+        if(header.has(claim)) return String.valueOf(header.get(claim));
+        else return null;
+    }
+
+    public String extractSender(String jwt) throws Exception {
+
+        logger.info("Extracting Sender Claim.");
+        try {
+            return extractAllClaims(jwt).get("iss", String.class);
+        }catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+    }
 }

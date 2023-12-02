@@ -1,5 +1,9 @@
 package com.backend.playground.jwt;
 
+import com.backend.playground.customs.CustomUserDetails;
+import com.backend.playground.customs.CustomUserDetailsService;
+import com.backend.playground.entity.Token;
+import com.backend.playground.enums.TokenType;
 import com.backend.playground.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -26,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
     @Autowired
     private JwtService jwtService;
     @Autowired
-    private UserDetailsService userDetailsService;
+    private CustomUserDetailsService customUserDetailsService;
     @Autowired
     private TokenRepository tokenRepository;
 
@@ -36,19 +38,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        if (request.getServletPath().contains("/api/v1/auth")) {
+        System.out.println(request.getServletPath());
+        if (request.getServletPath().contains("/swagger-ui") || request.getServletPath().contains("/api/v1/auth") || request.getServletPath().contains("/login")) {
             filterChain.doFilter(request, response);
             return;
         }
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
+//        System.out.println(authHeader);
         if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             logger.error("Please Provide Valid Token.");
             return;
         }
+        final String jwt;
+        final String userEmail;
         jwt = authHeader.substring(7);
+
         try {
             userEmail = jwtService.extractUsername(jwt);
         } catch (Exception e) {
@@ -56,22 +61,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
             filterChain.doFilter(request, response);
             return;
         }
+        System.out.println(userEmail);
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            var isTokenValid = tokenRepository.findByToken(jwt)
-                    .map(t -> !t.isExpired() && !t.isRevoked())
-                    .orElse(false);
+
+            CustomUserDetails customUserDetails = this.customUserDetailsService.loadUserByUsername(userEmail);
+
             try {
-                if (jwtService.isTokenValid(jwt, userDetails) && isTokenValid) {
+                if (jwtService.isTokenValid(jwt, customUserDetails)) {
+
+                    final String sender;
+                    try {
+                        sender = jwtService.extractSender(jwt);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+
+                    if(!sender.equals("Local")) {
+                        Token new_token = new Token(null, jwt, TokenType.BEARER, false, false, customUserDetails.getUser());
+                        tokenRepository.save(new_token);
+                    }
+
+                    var isTokenValid = tokenRepository.findByToken(jwt)
+                            .map(t -> !t.isExpired() && !t.isRevoked())
+                            .orElse(false);
+
+                    if(!isTokenValid) {
+                        logger.error("Token is not valid");
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
+                            customUserDetails,
                             null,
-                            userDetails.getAuthorities()
+                            customUserDetails.getAuthorities()
                     );
                     authToken.setDetails(
                             new WebAuthenticationDetailsSource().buildDetails(request)
                     );
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage());
@@ -81,4 +112,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
         }
         filterChain.doFilter(request, response);
     }
+
+
 }

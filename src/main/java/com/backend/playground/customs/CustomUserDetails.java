@@ -1,4 +1,4 @@
-package com.backend.playground.userdetails;
+package com.backend.playground.customs;
 
 import com.backend.playground.entity.Image;
 import com.backend.playground.entity.User;
@@ -22,6 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
+    private int Id;
     private String firstName;
     private String lastName;
     private String email;
@@ -33,7 +34,10 @@ public class CustomUserDetails implements UserDetails {
     private boolean isActive;
     private Image image;
 
+    private User user;
+
     public CustomUserDetails(User user) {
+        this.Id=user.getId();
         this.firstName=user.getFirstName();
         this.lastName=user.getLastName();
         this.email=user.getEmail();
@@ -43,6 +47,7 @@ public class CustomUserDetails implements UserDetails {
         this.password=user.getPassword();
         this.isActive= user.isActive();
         this.image=user.getImage();
+        this.user=user;
     }
 
     @Override

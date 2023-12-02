@@ -1,12 +1,12 @@
 package com.backend.playground.service;
 
+import com.backend.playground.customs.CustomUserDetails;
 import com.backend.playground.dto.AuthenticationRequestDTO;
 import com.backend.playground.dto.AuthenticationResponseDTO;
 import com.backend.playground.dto.UserDTO;
 import com.backend.playground.entity.Token;
 import com.backend.playground.entity.User;
 import com.backend.playground.enums.TokenType;
-import com.backend.playground.userdetails.CustomUserDetails;
 import com.backend.playground.jwt.JwtService;
 import com.backend.playground.mapper.UserMapper;
 import com.backend.playground.repository.TokenRepository;
@@ -50,14 +50,11 @@ public class AuthenticationService {
             saveUserToken(savedUser, jwtToken);
 
             logger.info("User Registered Successfully");
-            logger.info("###########################################");
             return AuthenticationResponseDTO.builder()
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)
                     .build();
         }catch (Exception e) {
-//            logger.error(e.getMessage());
-//            return AuthenticationResponseDTO.builder().build();
             throw new Exception(e.getMessage());
         }
     }
@@ -80,24 +77,57 @@ public class AuthenticationService {
             saveUserToken(user, jwtToken);
 
             logger.info("User Authenticated Successfully");
-            logger.info("###########################################");
             return AuthenticationResponseDTO.builder()
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)
                     .build();
 
         }catch (Exception e) {
-//            logger.error(e.getMessage());
-//            return AuthenticationResponseDTO.builder().build();
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    public AuthenticationResponseDTO refreshToken(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        logger.info("Refreshing Token");
+        try {
+            final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            final String refreshToken;
+            final String userEmail;
+            if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
+                throw new Exception("Bad Request");
+            }
+            refreshToken = authHeader.substring(7);
+            userEmail = jwtService.extractUsername(refreshToken);
+            if (userEmail != null) {
+                var user = this.userRepository.findByEmail(userEmail).orElseThrow();
+                CustomUserDetails customUserDetails = new CustomUserDetails(user);
+                if (jwtService.isTokenValid(refreshToken, customUserDetails)) {
+                    var accessToken = jwtService.generateToken(customUserDetails);
+                    revokeAllUserTokens(user);
+                    saveUserToken(user, accessToken);
+                    logger.info("Token Refreshed Successfully");
+//                    var authResponse = AuthenticationResponseDTO.builder()
+//                            .accessToken(accessToken)
+//                            .refreshToken(refreshToken)
+//                            .build();
+//                    new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+                    return AuthenticationResponseDTO.builder()
+                            .accessToken(accessToken)
+                            .refreshToken(refreshToken)
+                            .build();
+                }
+                throw new Exception("Token Not Valid.");
+            }else {
+                throw new Exception("UserEmail Not Found");
+            }
+        }catch (Exception e) {
             throw new Exception(e.getMessage());
         }
     }
 
     private void saveUserToken(User user, String jwtToken) throws Exception {
         logger.info("Saving User Token");
-        String[] token_arr = jwtToken.split("\\.");
-        System.out.println("length : "+token_arr[2].length());
-        System.out.println(jwtToken);
         try {
             var token = Token.builder()
                     .user(user)
@@ -109,7 +139,6 @@ public class AuthenticationService {
             tokenRepository.save(token);
             logger.info("Token Saved to Respective User");
         }catch (Exception e) {
-//            logger.error(e.getMessage());
             throw new Exception(e.getMessage());
         }
     }
@@ -128,49 +157,6 @@ public class AuthenticationService {
             tokenRepository.saveAll(validUserTokens);
             logger.info("Revoke Successful");
         }catch (Exception e) {
-//            logger.error(e.getMessage());
-            throw new Exception(e.getMessage());
-        }
-    }
-
-    public AuthenticationResponseDTO refreshToken(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-        logger.info("Refreshing Token");
-        try {
-            final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-            final String refreshToken;
-            final String userEmail;
-            if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
-                logger.info("Please Provide Correct Bearer Token");
-                throw new Exception("Bad Request");
-            }
-            refreshToken = authHeader.substring(7);
-            userEmail = jwtService.extractUsername(refreshToken);
-            if (userEmail != null) {
-                var user = this.userRepository.findByEmail(userEmail).orElseThrow();
-                CustomUserDetails customUserDetails = new CustomUserDetails(user);
-                if (jwtService.isTokenValid(refreshToken, customUserDetails)) {
-                    var accessToken = jwtService.generateToken(customUserDetails);
-                    revokeAllUserTokens(user);
-                    saveUserToken(user, accessToken);
-                    logger.info("Token Refreshed Successfully");
-                    logger.info("###########################################");
-//                    var authResponse = AuthenticationResponseDTO.builder()
-//                            .accessToken(accessToken)
-//                            .refreshToken(refreshToken)
-//                            .build();
-//                    new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-                    return AuthenticationResponseDTO.builder()
-                            .accessToken(accessToken)
-                            .refreshToken(refreshToken)
-                            .build();
-                }
-                throw new Exception("Token Not Valid.");
-            }else {
-                throw new Exception("UserEmail Not Found");
-            }
-        }catch (Exception e) {
-//            logger.error(e.getMessage());
             throw new Exception(e.getMessage());
         }
     }
