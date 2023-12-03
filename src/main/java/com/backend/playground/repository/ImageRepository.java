@@ -1,9 +1,0 @@
-package com.backend.playground.repository;
-
-import com.backend.playground.entity.Image;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-@Repository
-public interface ImageRepository extends JpaRepository<Image, Integer> {
-}
